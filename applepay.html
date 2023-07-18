@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"></script>
+
+    <script>
+        function onApplePayButtonClicked() {
+
+            if (!ApplePaySession) {
+                return;
+            }
+
+            // Define ApplePayPaymentRequest
+            const request = {
+                "countryCode": "US",
+                "currencyCode": "USD",
+                "merchantCapabilities": [
+                    "supports3DS"
+                ],
+                "supportedNetworks": [
+                    "visa",
+                    "masterCard",
+                    "amex",
+                    "discover"
+                ],
+                "total": {
+                    "label": "Demo (Card is not charged)",
+                    "type": "final",
+                    "amount": "1.99"
+                }
+            };
+
+            const textarea = document.getElementById('taConsole');
+            const apiURL = document.getElementById('apiURL').value;
+
+            // Create ApplePaySession
+            const session = new ApplePaySession(3, request);
+
+            session.onvalidatemerchant = async event => {
+                try {
+                    // Call your own server to request a new merchant session.
+                    //const merchantSession = await validateMerchant(validationURL);
+
+                    textarea.value = '';
+
+                    const validationURL = event.validationURL;
+                    console.log(`Validation URL: ${validationURL}`);
+                    textarea.value += `Validation URL: ${validationURL}` + '\r\n';
+
+                    const dataToSend = JSON.stringify({ "payer": { "validationURL": validationURL } });
+                    console.log(`Data Send: ${dataToSend}`);
+                    textarea.value += `Data Send: ${dataToSend}` + '\r\n';
+
+                    let dataReceived = "";
+                    var xhr = new XMLHttpRequest();
+                    var url = apiURL;
+                    console.log(`API URL: ${url}`);
+                    textarea.value += `API URL: ${url}` + '\r\n';
+
+                    xhr.open("POST", url, true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            dataReceived = xhr.responseText;
+                            console.log(`Data Received: ${dataReceived}`);
+                            textarea.value += `Data Received: ${dataReceived}` + '\r\n';
+                            var objDataReceived = JSON.parse(dataReceived);
+                            session.completeMerchantValidation(objDataReceived.payer);
+                        }
+                    };
+                    xhr.send(dataToSend);
+
+                }
+                catch (e) {
+                    textarea.value += `onvalidatemerchant Error: ${e}` + '\r\n';
+                }
+
+            };
+
+            session.onpaymentmethodselected = event => {
+                try {
+                    const update = {
+                        "newTotal": {
+                            "label": "Demo (Card is not charged)",
+                            "type": "final",
+                            "amount": "1.99"
+                        }
+                    };
+
+                    console.log(`Payment update: ${update}`);
+                    textarea.value += `Payment update: ${update}` + '\r\n';
+
+                    console.log(`Payment method selected: ${event.paymentMethod}`);
+                    textarea.value += `Payment method selected: ${event.paymentMethod}` + '\r\n';
+
+                    session.completePaymentMethodSelection(update);
+
+                }
+                catch (e) {
+                    textarea.value += `onpaymentmethodselected Error: ${e}` + '\r\n';
+                }
+
+            };
+
+            session.onpaymentauthorized = event => {
+                try {
+                    // Define ApplePayPaymentAuthorizationResult
+                    const result = {
+                        "status": 0
+                    };
+                    session.completePayment(result);
+                    console.log(`Token Received: ${event.payment.token}`);
+                    textarea.value += `Token Received: ${event.payment.token}` + '\r\n';
+                }
+                catch (e) {
+                    textarea.value += `onpaymentauthorized Error: ${e}` + '\r\n';
+                }
+
+            };
+
+            session.oncancel = event => {
+                // Payment cancelled by WebKit
+            };
+
+            session.begin();
+        }
+
+        function onTestButtonClicked() {
+            const textarea = document.getElementById('taConsole');
+            const apiURL = document.getElementById('apiURL').value;
+            textarea.value = '';
+
+            const validationURL = 'https://apple-pay-gateway-cert.apple.com/paymentservices/startSession';
+            console.log(`Validation URL: ${validationURL}`);
+            textarea.value += `Validation URL: ${validationURL}` + '\r\n';
+
+            const dataToSend = JSON.stringify({ "payer": { "validationURL": validationURL } });
+            console.log(`Data Send: ${dataToSend}`);
+            textarea.value += `Data Send: ${dataToSend}` + '\r\n';
+
+            let dataReceived = "";
+            var xhr = new XMLHttpRequest();
+            var url = apiURL;
+            console.log(`API URL: ${url}`);
+            textarea.value += `API URL: ${url}` + '\r\n';
+
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    dataReceived = xhr.responseText;
+                    //console.log(`Data Received: ${dataReceived}`);
+                    //textarea.value += `Data Received: ${dataReceived}` + '\r\n';
+                    var objDataReceived = JSON.parse(dataReceived);
+                    console.log(`Data Received: ${objDataReceived.payer}`);
+                    textarea.value += `Data Received: ${objDataReceived.payer}` + '\r\n';
+                }
+            };
+            xhr.send(dataToSend);
+        }
+    </script>
+
+    <style>
+        apple-pay-button {
+            --apple-pay-button-width: 150px;
+            --apple-pay-button-height: 30px;
+            --apple-pay-button-border-radius: 3px;
+            --apple-pay-button-padding: 0px 0px;
+            --apple-pay-button-box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div>0.0.16</div>
+    <textarea id="taConsole" name="taConsole" rows="40" cols="100"></textarea>
+    <br />
+    <input id="apiURL" type="text" value="https://train-dev.cashnut.net/cashneti/api/site/1.0/mockapplepaysession" style="width: 550px;">
+    <br />
+    Example:https://train-dev.cashnut.net/cashneti/api/site/1.0/mockapplepaysession
+    <br /><br /><br />
+    <apple-pay-button buttonstyle="black" type="plain" locale="en-US" onclick="onApplePayButtonClicked()"></apple-pay-button>
+
+    <button id="testButton" type="button" onclick="onTestButtonClicked()">TEST</button>
+</body>
+</html>

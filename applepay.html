@@ -38,9 +38,6 @@
 
             session.onvalidatemerchant = async event => {
                 try {
-                    // Call your own server to request a new merchant session.
-                    //const merchantSession = await validateMerchant(validationURL);
-
                     textarea.value = '';
 
                     const validationURL = event.validationURL;
@@ -77,7 +74,7 @@
 
             };
 
-            session.onpaymentmethodselected = event => {
+            /*session.onpaymentmethodselected = event => {
                 try {
                     const update = {
                         "newTotal": {
@@ -100,17 +97,16 @@
                     textarea.value += `onpaymentmethodselected Error: ${e}` + '\r\n';
                 }
 
-            };
+            };*/
 
             session.onpaymentauthorized = event => {
                 try {
-                    // Define ApplePayPaymentAuthorizationResult
                     const result = {
                         "status": 0
                     };
                     session.completePayment(result);
-                    console.log(`Token Received: ${event.payment.token}`);
-                    textarea.value += `Token Received: ${event.payment.token}` + '\r\n';
+                    console.log(`Token Received: ${JSON.stringify(event.payment.token)}`);
+                    textarea.value += `Token Received: ${JSON.stringify(event.payment.token)}` + '\r\n';
                 }
                 catch (e) {
                     textarea.value += `onpaymentauthorized Error: ${e}` + '\r\n';

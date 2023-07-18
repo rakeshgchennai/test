@@ -57,7 +57,7 @@
             const apiURL = document.getElementById('apiURL').value;
 
             // Create ApplePaySession
-            const session = new ApplePaySession(3, request);
+            const session = new ApplePaySession(14, request);
 
             session.onvalidatemerchant = async event => {
                 try {
@@ -191,7 +191,7 @@
 </head>
 
 <body>
-    <div>0.0.18</div>
+    <div>0.0.19</div>
     <textarea id="taConsole" name="taConsole" rows="40" cols="100"></textarea>
     <br />
     <input id="apiURL" type="text" value="https://train-dev.cashnut.net/cashneti/api/site/1.0/mockapplepaysession" style="width: 550px;">

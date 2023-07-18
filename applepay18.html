@@ -12,23 +12,46 @@
 
             // Define ApplePayPaymentRequest
             const request = {
-                "countryCode": "US",
-                "currencyCode": "USD",
-                "merchantCapabilities": [
-                    "supports3DS"
-                ],
-                "supportedNetworks": [
-                    "visa",
-                    "masterCard",
-                    "amex",
-                    "discover"
-                ],
-                "total": {
-                    "label": "Demo (Card is not charged)",
-                    "type": "final",
-                    "amount": "1.99"
-                }
-            };
+    "countryCode": "US",
+    "currencyCode": "USD",
+    "merchantCapabilities": [
+        "supports3DS"
+    ],
+    "supportedNetworks": [
+        "visa",
+        "masterCard",
+        "amex",
+        "discover"
+    ],
+    "lineItems": [
+        {
+            "label": "Subtotal",
+            "amount": "5.00"
+        },
+        {
+            "label": "Service fee",
+            "amount": "1.00"
+        }
+    ],
+    "multiTokenContexts": [
+        {
+            "merchantIdentifier": "merchant.com.cashnet.DEV",
+            "externalIdentifier": "merchant.com.cashnet.DEV",
+            "merchantName": "Transact Campus",
+            "amount": "5.00"
+        },
+        {
+            "merchantIdentifier": "merchant.com.cashnet.DEV",
+            "externalIdentifier": "merchant.com.cashnet.DEV",
+            "merchantName": "Transact Campus",
+            "amount": "1.00"
+        }
+    ],
+    "total": {
+        "label": "Multi-Merchant Demo (Card is not charged)",
+        "amount": "6.00"
+    }
+};
 
             const textarea = document.getElementById('taConsole');
             const apiURL = document.getElementById('apiURL').value;
@@ -168,7 +191,7 @@
 </head>
 
 <body>
-    <div>0.0.17</div>
+    <div>0.0.18</div>
     <textarea id="taConsole" name="taConsole" rows="40" cols="100"></textarea>
     <br />
     <input id="apiURL" type="text" value="https://train-dev.cashnut.net/cashneti/api/site/1.0/mockapplepaysession" style="width: 550px;">
